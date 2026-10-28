@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Calculate your car fuel costs, cost per kilometre and monthly driving expenses for free.">
+<title>CarCost Calculator | Free Fuel Cost Tool</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#0b1120;color:#f4f7fb;line-height:1.5}
+header{text-align:center;padding:34px 16px 20px}
+.logo{font-size:14px;letter-spacing:2px;color:#54e0b5;font-weight:bold}
+h1{font-size:clamp(30px,7vw,46px);margin:12px 0}
+header p{color:#aab6c8;max-width:540px;margin:auto}
+main{max-width:720px;margin:0 auto;padding:16px}
+.card{background:#141e30;border:1px solid #27364d;border-radius:18px;padding:22px;margin-bottom:18px}
+h2{font-size:20px;margin-top:0}
+label{display:block;font-size:14px;color:#c5d0df;margin:13px 0 6px}
+input,select{width:100%;padding:13px;border-radius:10px;border:1px solid #3a4a63;background:#0b1120;color:white;font-size:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{width:100%;padding:15px;border:0;border-radius:11px;background:#54e0b5;color:#06251d;font-size:17px;font-weight:bold;margin-top:20px;cursor:pointer}
+.results{display:none}
+.big{font-size:36px;color:#54e0b5;font-weight:bold;margin:4px 0 16px}
+.resultrow{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #2b394e}
+.resultrow:last-child{border:0}
+.muted{color:#aab6c8;font-size:13px}
+footer{text-align:center;padding:25px;color:#8d9bb0;font-size:13px}
+@media(max-width:430px){.grid{grid-template-columns:1fr}.card{padding:17px}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">CARCOST</div>
+<h1>Know What Your Car Costs.</h1>
+<p>Calculate your fuel expenses in seconds. Free, simple, and made for everyday drivers.</p>
+</header>
+<main>
+<section class="card">
+<h2>⛽ Fuel Cost Calculator</h2>
+<form id="calc">
+<label for="distance">Distance one way (km)</label>
+<input id="distance" type="number" min="0.1" step="any" value="25" required>
+<div class="grid">
+<div>
+<label for="consumption">Fuel consumption (L/100 km)</label>
+<input id="consumption" type="number" min="0.1" step="any" value="7" required>
+</div>
+<div>
+<label for="price">Fuel price (€/litre)</label>
+<input id="price" type="number" min="0" step="any" value="1.50" required>
+</div>
+</div>
+<label for="journey">Journey type</label>
+<select id="journey">
+<option value="1">One way</option>
+<option value="2" selected>Return trip</option>
+</select>
+<div class="grid">
+<div>
+<label for="trips">Trips per week</label>
+<input id="trips" type="number" min="1" max="100" step="1" value="5" required>
+</div>
+<div>
+<label for="weeks">Weeks per year</label>
+<input id="weeks" type="number" min="1" max="52" step="1" value="48" required>
+</div>
+</div>
+<label for="extras">Extra cost per trip (€) — tolls, parking, etc.</label>
+<input id="extras" type="number" min="0" step="any" value="0" required>
+<button type="submit">Calculate My Car Costs</button>
+</form>
+</section>
+<section class="card results" id="results" aria-live="polite">
+<h2>Your Results</h2>
+<div class="muted">Estimated cost per trip</div>
+<div class="big" id="tripCost">€0.00</div>
+<div class="resultrow"><span>Fuel used per trip</span><strong id="litres">0 L</strong></div>
+<div class="resultrow"><span>Cost per kilometre</span><strong id="perKm">€0.00</strong></div>
+<div class="resultrow"><span>Estimated weekly cost</span><strong id="weekly">€0.00</strong></div>
+<div class="resultrow"><span>Estimated monthly cost</span><strong id="monthly">€0.00</strong></div>
+<div class="resultrow"><span>Estimated yearly cost</span><strong id="yearly">€0.00</strong></div>
+<p class="muted">Estimates only. Actual costs vary with traffic, driving style, fuel prices and vehicle condition.</p>
+</section>
+<section class="card">
+<h2>How it works</h2>
+<p>Enter your distance, your car's average fuel consumption and the current fuel price. The calculator estimates the cost of each trip and what you could spend over a week, month or year.</p>
+<p class="muted">Tip: Check your vehicle handbook or dashboard for its average fuel consumption.</p>
+</section>
+</main>
+<footer>© <span id="year"></span> CarCost Calculator · Free online tool</footer>
+<script>
+const form=document.getElementById('calc');
+const money=n=>'€'+n.toLocaleString('en-IE',{minimumFractionDigits:2,maximumFractionDigits:2});
+form.addEventListener('submit',function(e){
+e.preventDefault();
+const distance=Number(document.getElementById('distance').value);
+const consumption=Number(document.getElementById('consumption').value);
+const price=Number(document.getElementById('price').value);
+const journey=Number(document.getElementById('journey').value);
+const trips=Number(document.getElementById('trips').value);
+const weeks=Number(document.getElementById('weeks').value);
+const extras=Number(document.getElementById('extras').value);
+if(distance<=0||consumption<=0||price<0||trips<1||weeks<1||extras<0)return;
+const km=distance*journey;
+const litres=km*consumption/100;
+const trip=litres*price+extras;
+const yearly=trip*trips*weeks;
+document.getElementById('tripCost').textContent=money(trip);
+document.getElementById('litres').textContent=litres.toFixed(2)+' L';
+document.getElementById('perKm').textContent=money(trip/km);
+document.getElementById('weekly').textContent=money(trip*trips);
+document.getElementById('monthly').textContent=money(yearly/12);
+document.getElementById('yearly').textContent=money(yearly);
+document.getElementById('results').style.display='block';
+document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+});
+document.getElementById('year').textContent=new Date().getFullYear();
+form.requestSubmit();
+</script>
+</body>
+</html>
